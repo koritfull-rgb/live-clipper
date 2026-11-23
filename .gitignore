@@ -1,0 +1,8 @@
+node_modules/
+dist/
+bin/
+buffer/
+clips/
+tmp/
+tools/
+settings.json

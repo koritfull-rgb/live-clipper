@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Live Clipper</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%235b3fd1'/><path d='M12 9l11 7-11 7z' fill='white'/></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"></span>
+      <span>Live Clipper</span>
+      <span class="version">v0.3</span>
+    </div>
+    <div class="topbar-right">
+      <div class="status" id="status" data-state="idle" data-tour="status">
+        <span class="dot"></span><span id="statusText">Не записывается</span>
+      </div>
+      <button class="icon-btn" id="helpBtn" title="Показать подсказки" data-tour="help" aria-label="Показать подсказки">?</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- 1. Ссылка и запись -->
+    <section class="card">
+      <label class="label" for="urlInput">Ссылка на стрим</label>
+      <div class="row">
+        <input id="urlInput" type="url" placeholder="https://www.twitch.tv/... или https://www.youtube.com/@канал/live" autocomplete="off" spellcheck="false" data-tour="url">
+        <button class="btn btn-primary" id="recordBtn" data-tour="record">Начать запись</button>
+      </div>
+      <div class="buffer" data-tour="buffer">
+        <div class="buffer-bar"><div class="buffer-fill" id="bufferFill"></div></div>
+        <span class="buffer-text" id="bufferText">Буфер: 0:00 / 6:00</span>
+      </div>
+      <p class="message" id="recMessage" hidden></p>
+    </section>
+
+    <!-- 2. Клип -->
+    <section class="card">
+      <div class="clip-grid">
+        <div>
+          <div class="label">Длина клипа</div>
+          <div class="segmented" id="lengthGroup" data-tour="length">
+            <button data-value="30">30 сек</button>
+            <button data-value="60">1 мин</button>
+            <button data-value="120">2 мин</button>
+            <button data-value="300">5 мин</button>
+          </div>
+        </div>
+        <div>
+          <div class="label">Формат</div>
+          <div class="segmented" id="formatGroup" data-tour="format">
+            <button data-value="vertical">9:16 с размытым фоном</button>
+            <button data-value="original">Оригинал</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- авто-клипы по реакции чата -->
+      <div class="auto-row" data-tour="auto">
+        <label class="switch">
+          <input type="checkbox" id="autoToggle">
+          <span class="switch-track" aria-hidden="true"></span>
+          <span>Авто-клипы</span>
+        </label>
+        <div class="auto-sens">
+          <span class="muted">Чувствительность</span>
+          <div class="segmented segmented-sm" id="sensGroup">
+            <button data-value="low">Низкая</button>
+            <button data-value="medium">Средняя</button>
+            <button data-value="high">Высокая</button>
+          </div>
+        </div>
+        <div class="chat-line" id="chatLine"></div>
+      </div>
+
+      <!-- обёртка нужна, чтобы подсказка при наведении работала и у неактивной кнопки -->
+      <div class="clip-wrap" id="clipWrap" data-tour="clip">
+        <button class="btn btn-clip" id="clipBtn" disabled>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+          Клип
+        </button>
+      </div>
+      <div class="hotkey-hint" data-tour="hotkey">
+        или нажми <kbd>Пробел</kbd> / <kbd>C</kbd>
+      </div>
+
+      <div class="progress" id="clipProgress" hidden><div class="progress-fill" id="clipProgressFill"></div></div>
+      <p class="message" id="clipMessage" hidden></p>
+    </section>
+
+    <!-- 3. Клипы -->
+    <section class="gallery-section" data-tour="gallery">
+      <div class="section-head">
+        <h2>Клипы</h2>
+        <span class="muted" id="clipCount"></span>
+        <div class="folder-line" id="folderLine" data-tour="folder-line" hidden>
+          <span class="folder-path" id="folderPath"></span>
+          <button type="button" class="link-btn" id="changeFolderBtn">Сменить</button>
+          <button type="button" class="link-btn" id="openFolderBtn">Открыть</button>
+        </div>
+      </div>
+
+      <button type="button" class="add-folder" id="addFolderCard" data-tour="folder" hidden>
+        <span class="add-folder-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <line x1="12" y1="10.5" x2="12" y2="15.5"/><line x1="9.5" y1="13" x2="14.5" y2="13"/>
+          </svg>
+        </span>
+        <span>Добавить папку</span>
+      </button>
+
+      <div class="gallery" id="gallery"></div>
+      <div class="empty" id="galleryEmpty" hidden>Здесь появятся твои клипы.</div>
+    </section>
+  </main>
+
+  <!-- Просмотр клипа -->
+  <dialog id="playerDialog" class="dialog player-dialog">
+    <video id="player" controls playsinline></video>
+    <div class="dialog-actions">
+      <span class="muted" id="playerName"></span>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-ghost" id="playerClose">Закрыть</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="tour.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
