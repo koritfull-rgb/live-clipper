@@ -1,7 +1,7 @@
 {
   "name": "live-clipper",
   "productName": "Live Clipper",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Нарезка клипов из живых стримов (Twitch, YouTube)",
   "author": "Live Clipper",
   "main": "electron/main.js",
